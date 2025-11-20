@@ -1,5 +1,5 @@
-using System;
 using SoftGear.Strix.Unity.Runtime;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -131,9 +131,14 @@ public class Character : StrixBehaviour, IPlayerControlActions, ICameraControlAc
     /// <param name="context"></param>
     public void OnShoot(InputAction.CallbackContext context)
     {
+        if (isLocal == false)
+        {
+            return;
+        }
         if (context.started)
         {
-            CallShootArrow(firePos.position, firePos.rotation);
+            //CallShootArrow(firePos.position, firePos.rotation);
+            RpcToAll(nameof(CallShootArrow), firePos.position, firePos.rotation);
         }
     }
     /// <summary>
@@ -141,6 +146,7 @@ public class Character : StrixBehaviour, IPlayerControlActions, ICameraControlAc
     /// </summary>
     /// <param name="position">発射位置</param>
     /// <param name="rotation">発射角度</param>
+    [StrixRpc]
     private void CallShootArrow(Vector3 position, Quaternion rotation)
     {
         var bullet = Instantiate<Bullet>(bulletObject, position, rotation, null);
@@ -155,7 +161,8 @@ public class Character : StrixBehaviour, IPlayerControlActions, ICameraControlAc
     /// <param name="effPos">表示エフェクト位置情報</param>
     public void OnHit(Transform effPos)
     {
-        PlayEffect(effPos.position, effPos.rotation);
+        //PlayEffect(effPos.position, effPos.rotation);
+        RpcToAll(nameof(PlayEffect), effPos.position, effPos.rotation);
     }
 
     /// <summary>
@@ -163,6 +170,7 @@ public class Character : StrixBehaviour, IPlayerControlActions, ICameraControlAc
     /// </summary>
     /// <param name="position">表示エフェクト位置</param>
     /// <param name="rotation">表示エフェクト角度</param>
+    [StrixRpc]
     private void PlayEffect(Vector3 position, Quaternion rotation)
     {
         //エフェクトのオブジェクトを生成し、指定位置に配置する
@@ -201,8 +209,9 @@ public class Character : StrixBehaviour, IPlayerControlActions, ICameraControlAc
     /// </summary>
     private void UpdateTransform()
     {
-        if(isLocal == false)
-        {    return;
+        if (isLocal == false)
+        {
+            return;
         }
         // アニメーターの現在のステートを取得
         currentBaseState = _animator.GetCurrentAnimatorStateInfo(0);

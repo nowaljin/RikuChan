@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SoftGear.Strix.Unity.Runtime;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -6,7 +7,7 @@ using UnityEngine.InputSystem;
 using UnityEngine.UI;
 using static SampleControls;
 
-public class Chat : MonoBehaviour, IChatActions
+public class Chat : StrixBehaviour, IChatActions
 {
     // チャット入力欄
     [SerializeField] InputField chatInputField;
@@ -69,12 +70,10 @@ public class Chat : MonoBehaviour, IChatActions
             {
                 if (chatInputField.text != "")
                 {
-                    // チャットを送る
-                    SendChat("", chatInputField.text, DateTime.Now);
-                    // 吹き出しを表示登録
-                    SetHukidashi(chatInputField.text);
+                    var msg = chatInputField.text;
 
-                    // 入力を空にする
+                    RpcToAll(nameof(SendChat), "", msg, DateTime.Now);
+
                     chatInputField.text = "";
                 }
             }
@@ -87,6 +86,7 @@ public class Chat : MonoBehaviour, IChatActions
     /// <param name="name">送信者名</param>
     /// <param name="message">チャットテキスト</param>
     /// <param name="time">送信時間</param>
+    [StrixRpc]
     public void SendChat(string name, string message, DateTime time)
     {
         // ログの追加
